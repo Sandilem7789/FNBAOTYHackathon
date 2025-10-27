@@ -1,23 +1,11 @@
-from rest_framework import viewsets
-from rest_framework.authtoken.views import obtain_auth_token
+from rest_framework import viewsets, generics
 from rest_framework.permissions import IsAuthenticated
-from .models import (
-    Garden,
-    Produce,
-    Vendor,
-    Order,
-    OrderItem
-)
-from .serializers import (
-    GardenSerializer,
-    ProduceSerializer,
-    VendorSerializer,
-    OrderSerializer,
-    OrderItemSerializer
-)
-from rest_framework import generics
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
+from .models import Garden, Produce, Vendor, Order, OrderItem
+from .serializers import GardenSerializer, ProduceSerializer, VendorSerializer, OrderSerializer, OrderItemSerializer
 
-# Garden ViewSet
+# 🌱 Garden ViewSet
 class GardenViewSet(viewsets.ModelViewSet):
     queryset = Garden.objects.all()
     serializer_class = GardenSerializer
@@ -29,34 +17,30 @@ class GardenViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-# Produce ViewSet
+# 🥕 Produce ViewSet (for authenticated gardener)
 class ProduceViewSet(viewsets.ModelViewSet):
-    queryset = Produce.objects.all()
     serializer_class = ProduceSerializer
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         return Produce.objects.filter(garden__owner=self.request.user)
 
-# Vendor ViewSet
+# 🛒 Vendor ViewSet
 class VendorViewSet(viewsets.ModelViewSet):
     queryset = Vendor.objects.all()
     serializer_class = VendorSerializer
 
-# Order ViewSet
+# 📦 Order ViewSet
 class OrderViewSet(viewsets.ModelViewSet):
     queryset = Order.objects.all()
     serializer_class = OrderSerializer
 
-# OrderItem ViewSet
+# 📦 OrderItem ViewSet
 class OrderItemViewSet(viewsets.ModelViewSet):
     queryset = OrderItem.objects.all()
+    serializer_class = OrderItemSerializer
 
-from rest_framework.response import Response
-from rest_framework.decorators import api_view
-from .models import Garden
-from .serializers import ProduceSerializer
-
+# 🌿 Custom Endpoint: Produce by Garden ID
 @api_view(['GET'])
 def garden_produce(request, garden_id):
     try:
@@ -68,6 +52,7 @@ def garden_produce(request, garden_id):
     serializer = ProduceSerializer(produce, many=True)
     return Response(serializer.data)
 
+# 🌿 Custom Endpoint: Produce for Logged-in Gardener
 @api_view(['GET'])
 def gardener_produce(request):
     user = request.user

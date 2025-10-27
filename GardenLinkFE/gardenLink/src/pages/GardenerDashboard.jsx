@@ -51,10 +51,9 @@ const GardenerDashboard = () => {
   }, []);
 
   const fetchProduce = (gardenId) => {
-  api.get('gardener/produce/')
-    .then(res => setProduce(res.data))
-    .catch(err => console.error('Gardener produce fetch error:', err));
-
+    api.get(`gardens/${gardenId}/produce/`)
+      .then(res => setProduceList(res.data))
+      .catch(err => console.error('Produce fetch error:', err));
   };
 
   const handleAddGarden = async (e) => {
@@ -80,21 +79,30 @@ const GardenerDashboard = () => {
 
   const handleDeleteProduce = async (id) => {
   if (!window.confirm('Are you sure you want to delete this produce item?')) return;
-
-  try {
-    await api.delete(`produce/${id}/`);
-    fetchProduce(newProduce.garden);
-  } catch (err) {
-    console.error('Failed to delete produce:', err);
-  }
-};
+    try {
+      await api.delete(`produce/${id}/`);
+      fetchProduce(newProduce.garden);
+    } catch (err) {
+      console.error('Failed to delete produce:', err);
+    }
+  };
 
 
   const handleAddProduce = async (e) => {
     e.preventDefault();
+
+    if (!newProduce.garden) {
+      console.error('No garden ID set for produce.');
+      alert('Please select or create a garden before adding produce.');
+      return;
+    }
+
     const formData = new FormData();
+
     Object.entries(newProduce).forEach(([key, value]) => {
-      if (value !== null && value !== '') {
+      if (key === 'garden') {
+        formData.append('garden', String(value));
+      } else if (value !== null && value !== '') {
         formData.append(key, value);
       }
     });
@@ -110,6 +118,8 @@ const GardenerDashboard = () => {
       console.error('Produce creation failed:', err);
     }
   };
+
+
 
   const handleAddHarvest = (produce) => {
     const quantity = prompt(`Add quantity to ${produce.name}:`);
@@ -132,6 +142,22 @@ const GardenerDashboard = () => {
       {garden ? (
         <>
           <div className="backdrop-blur-sm bg-white/30 px-4 py-2 rounded-md shadow-md mb-4">
+            <select
+              value={newProduce.garden}
+              onChange={(e) => {
+                const selectedGardenId = e.target.value;
+                setNewProduce((prev) => ({ ...prev, garden: selectedGardenId }));
+                fetchProduce(selectedGardenId);
+              }}
+              className="mb-4 w-full max-w-md border rounded px-4 py-2"
+            >
+              <option value="">Select a garden</option>
+              {gardens.map((g) => (
+                <option key={g.id} value={g.id}>
+                  {g.name} — {g.location}
+                </option>
+              ))}
+            </select>
             <h1 className="text-3xl font-bold text-green-800 text-center">
               {garden.name}
             </h1>
@@ -179,6 +205,20 @@ const GardenerDashboard = () => {
 
           {showProduceForm && (
             <form onSubmit={handleAddProduce} className="mb-8 w-full max-w-xl space-y-4">
+              <select
+                value={newProduce.garden}
+                onChange={(e) => setNewProduce({ ...newProduce, garden: e.target.value })}
+                className="w-full border rounded px-4 py-2"
+                required
+              >
+                <option value="">Select a garden</option>
+                {gardens.map((g) => (
+                  <option key={g.id} value={g.id}>
+                    {g.name}
+                  </option>
+                ))}
+              </select>
+
               <input type="text" placeholder="Produce Name" value={newProduce.name}
                 onChange={(e) => setNewProduce({ ...newProduce, name: e.target.value })}
                 className="w-full border rounded px-4 py-2" required />
