@@ -119,8 +119,6 @@ const GardenerDashboard = () => {
     }
   };
 
-
-
   const handleAddHarvest = (produce) => {
     const quantity = prompt(`Add quantity to ${produce.name}:`);
     if (!quantity) return;
@@ -159,7 +157,7 @@ const GardenerDashboard = () => {
               ))}
             </select>
             <h1 className="text-3xl font-bold text-green-800 text-center">
-              {garden.name}
+              {/*garden.name*/}
             </h1>
           </div>
           <div className="grid gap-6 w-full max-w-4xl sm:grid-cols-2 md:grid-cols-3 mb-6">

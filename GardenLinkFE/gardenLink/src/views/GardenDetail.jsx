@@ -4,17 +4,19 @@ import api from '../api';
 import { useCart } from '../context/CartContext';
 
 function GardenDetail() {
-  const { id } = useParams();
+  const { id } = useParams(); // garden ID from URL
   const [garden, setGarden] = useState(null);
   const [produce, setProduce] = useState([]);
   const { addToCart } = useCart();
 
   useEffect(() => {
+    // Fetch garden details
     api.get(`gardens/${id}/`)
       .then(res => setGarden(res.data))
       .catch(err => console.error('Garden fetch error:', err));
 
-    api.get(`produce/?garden=${id}`)
+    // ✅ Fetch produce scoped to this garden
+    api.get(`gardens/${id}/produce/`)
       .then(res => setProduce(res.data))
       .catch(err => console.error('Produce fetch error:', err));
   }, [id]);
@@ -34,25 +36,30 @@ function GardenDetail() {
         Available Produce
       </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {produce.map(p => (
-          <div key={p.id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">
-            <img
-              src={p.image || '/default.png'}
-              alt={p.name}
-              className="w-full h-40 object-cover rounded-md mb-3"
-            />
-            <h3 className="text-xl font-bold text-gray-900">{p.name}</h3>
-            <p className="text-gray-700">{p.quantity} {p.unit}</p>
-            <button
-              className="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded"
-              onClick={() => addToCart(p, 1)}
-            >
-              Add to Order
-            </button>
-          </div>
-        ))}
-      </div>
+      {produce.length === 0 ? (
+        <p className="text-center text-gray-500">No produce available for this garden yet.</p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          {produce.map(p => (
+            <div key={p.id} className="bg-white rounded-lg shadow-md p-4 hover:shadow-lg transition">
+              <img
+                src={p.image || '/default.png'}
+                alt={p.name}
+                className="w-full h-40 object-cover rounded-md mb-3"
+              />
+              <h3 className="text-xl font-bold text-gray-900">{p.name}</h3>
+              <p className="text-gray-700">{p.quantity} {p.unit}</p>
+              <p className="text-gray-700 font-medium">R{p.price}</p>
+              <button
+                className="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded"
+                onClick={() => addToCart(p, 1)}
+              >
+                Add to Order
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
