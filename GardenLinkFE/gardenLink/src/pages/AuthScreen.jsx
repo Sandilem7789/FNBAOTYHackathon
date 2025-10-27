@@ -1,20 +1,35 @@
+import axios from 'axios';
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import api from '../api';
+
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const role = location.state?.role || 'vendor'; // default to vendor
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://127.0.0.1:8000/api/login/', {
-        username: email, // or full name if you're using that
+      const response = await api.post('login/', {
+        username,
         password,
       });
       const token = response.data.token;
       localStorage.setItem('token', token);
-      navigate('/vendor/dashboard');
+      localStorage.setItem('role', role); // store role for later use
+
+      // Redirect based on role
+      if (role === 'vendor') {
+        navigate('/vendor/dashboard');
+      } else {
+        navigate('/gardener/dashboard');
+      }
     } catch (error) {
       console.error('Login failed:', error);
       alert('Invalid credentials');
@@ -22,10 +37,12 @@ const AuthScreen = () => {
   };
 
   return (
-    <div className="w-screen h-screen flex items-center justify-center bg-gradient-to-br from-green-200 to-green-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-6">
-        <h2 className="text-2xl font-bold text-green-800 mb-4 text-center">
-          {isLogin ? 'Vendor Login' : 'Vendor Signup'}
+    <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] px-4">
+      <div className="bg-white bg-opacity-80 backdrop-blur-sm p-6 sm:p-8 rounded-lg shadow-lg max-w-md w-full text-center">
+        <h2 className="text-2xl font-bold text-green-800 mb-4">
+          {isLogin
+            ? `${role.charAt(0).toUpperCase() + role.slice(1)} Login`
+            : `${role.charAt(0).toUpperCase() + role.slice(1)} Signup`}
         </h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           {!isLogin && (
@@ -37,15 +54,19 @@ const AuthScreen = () => {
             />
           )}
           <input
-            type="email"
-            placeholder="Email"
+            type="text"
+            placeholder="Username"
             className="border rounded px-4 py-2"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             required
           />
           <input
             type="password"
             placeholder="Password"
             className="border rounded px-4 py-2"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
           />
           <button
@@ -55,15 +76,15 @@ const AuthScreen = () => {
             {isLogin ? 'Login' : 'Sign Up'}
           </button>
         </form>
-        <p className="mt-4 text-sm text-center">
-          {isLogin ? "Don't have an account?" : 'Already have an account?'}{' '}
-          <button
-            onClick={() => setIsLogin(!isLogin)}
-            className="w-full bg-gray-100 text-green-700 py-2 rounded text-lg font-medium hover:bg-gray-200 transition mt-2"
-          >
-            {isLogin ? 'Sign up' : 'Log in'}
-          </button>
+        <p className="mt-4 text-sm">
+          {isLogin ? "Don't have an account?" : 'Already have an account?'}
         </p>
+        <button
+          onClick={() => setIsLogin(!isLogin)}
+          className="w-full bg-gray-100 text-green-700 py-2 rounded text-lg font-medium hover:bg-gray-200 transition mt-2"
+        >
+          {isLogin ? 'Sign up' : 'Log in'}
+        </button>
       </div>
     </div>
   );

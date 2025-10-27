@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 
 # Garden Model
 class Garden(models.Model):
@@ -8,7 +9,8 @@ class Garden(models.Model):
     phone_number = models.CharField(max_length=20)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
-    image = models.URLField(null=True, blank=True)
+    image = models.ImageField(upload_to='gardens/', null=True, blank=True)  
+    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='gardens')  # 👈 Add this
 
     def __str__(self):
         return self.name
@@ -17,10 +19,11 @@ class Garden(models.Model):
 class Produce(models.Model):
     name = models.CharField(max_length=100)
     garden = models.ForeignKey('Garden', on_delete=models.CASCADE, related_name='produce')
-    image = models.URLField(null=True, blank=True)
-    quantity = models.PositiveIntegerField(default=10)
+    quantity = models.PositiveIntegerField()
     unit = models.CharField(max_length=20, default="kg")
-
+    weight = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    price = models.DecimalField(max_digits=6, decimal_places=2, null=True, blank=True)
+    image = models.ImageField(upload_to='produce_images/', null=True, blank=True)
 
     def __str__(self):
         return f"{self.name} ({self.quantity} {self.unit})"

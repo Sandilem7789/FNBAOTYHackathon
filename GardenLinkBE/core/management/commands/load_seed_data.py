@@ -50,18 +50,29 @@ class Command(BaseCommand):
             with open(filepath, newline='', encoding='utf-8') as csvfile:
                 reader = csv.DictReader(csvfile)
                 for row in reader:
-                    garden_name = row['garden']
-                    garden = Garden.objects.filter(name=garden_name).first()
-                    if garden:
+                    garden = None
+                    if 'garden_id' in row:
+                        garden = Garden.objects.filter(id=row['garden_id']).first()
+                    elif 'garden' in row:
+                        garden = Garden.objects.filter(name=row['garden']).first()
+
+                    if not garden:
+                        self.stdout.write(self.style.WARNING(f'⚠️ Garden not found for row: {row}'))
+                        continue
+
+                    try:
                         Produce.objects.create(
                             name=row['name'],
-                            quantity=row['quantity'],
-                            unit=row['unit'],
-                            garden=garden,
-                            image=row.get('image')
+                            quantity=int(row['quantity']),
+                            unit=row.get('unit', 'kg'),
+                            weight=float(row.get('weight', 0)),
+                            price=float(row.get('price', 0)),
+                            image=row.get('image'),
+                            garden=garden
                         )
-                    else:
-                        self.stdout.write(self.style.WARNING(f'⚠️ Garden not found: {garden_name}'))
+                    except Exception as e:
+                        self.stdout.write(self.style.WARNING(f'⚠️ Error creating produce {row.get("name")}: {e}'))
+
             self.stdout.write(self.style.SUCCESS('✅ Produce loaded successfully.'))
         except Exception as e:
             self.stdout.write(self.style.ERROR(f'❌ Error loading produce: {e}'))

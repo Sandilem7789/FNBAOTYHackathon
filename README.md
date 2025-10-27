@@ -65,7 +65,7 @@ Full Stack Developer & Community Vendor
 git clone https://github.com/Sandilem7789/FNBAOTYHackathon.git
 
 # Navigate to frontend
-cd GardenLinkFE
+cd GardenLinkFE/gardenLink
 
 # Install dependencies
 npm install
@@ -78,6 +78,9 @@ cd GardenLinkBE
 
 # Activate virtual environment
 source env/bin/activate  # or .\env\Scripts\activate on Windows
+
+# Install requirements
+pip install -r requirements.txt
 
 # Run server
 python manage.py runserver

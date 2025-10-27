@@ -1,33 +1,40 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-
-const allGardens = [
-  { id: 1, name: 'Msimanga Gardens', location: 'Msimanga', produceCount: 12, distance: 5 },
-  { id: 2, name: 'Isandlwana Greens', location: 'Isandlwana', produceCount: 8, distance: 25 },
-  { id: 3, name: 'Nongoma Harvest', location: 'Nongoma', produceCount: 15, distance: 8 },
-];
+import api from '../api';
 
 const VendorDashboard = () => {
   const navigate = useNavigate();
+  const [gardens, setGardens] = useState([]);
   const [showNearbyOnly, setShowNearbyOnly] = useState(false);
 
+  useEffect(() => {
+    api.get('gardens/')
+      .then(res => {
+        const enriched = res.data.map(g => ({
+          ...g,
+          distance: Math.floor(Math.random() * 30) + 1,
+          produceCount: g.produce?.length || 0,
+        }));
+        setGardens(enriched);
+      })
+      .catch(err => console.error('Garden fetch error:', err));
+  }, []);
+
   const filteredGardens = showNearbyOnly
-    ? allGardens.filter((g) => g.distance <= 10)
-    : allGardens;
+    ? gardens.filter(g => g.distance <= 10)
+    : gardens;
 
   const handleGardenClick = (id) => {
     navigate(`/vendor/garden/${id}`);
   };
 
   return (
-    <div className="w-screen min-h-screen bg-gradient-to-br from-green-100 to-green-50 flex flex-col items-center px-4 py-8">
-      <h1 className="text-3xl font-bold text-green-800 mb-6 text-center">
-        🌿 Gardens Near You
-      </h1>
+    <div className="p-6">
+      <h1 className="text-4xl font-bold text-green-800 mb-8 text-center">🌿 Gardens Near You</h1>
 
       {/* Filter Toggle */}
-      <div className="flex gap-6 mb-8">
-        <label className="flex items-center gap-2 text-green-800 font-medium">
+      <div className="flex gap-6 justify-center mb-10">
+        <label className="flex items-center gap-2 text-green-800 font-medium text-lg">
           <input
             type="radio"
             name="filter"
@@ -36,7 +43,7 @@ const VendorDashboard = () => {
           />
           Show All Gardens
         </label>
-        <label className="flex items-center gap-2 text-green-800 font-medium">
+        <label className="flex items-center gap-2 text-green-800 font-medium text-lg">
           <input
             type="radio"
             name="filter"
@@ -47,23 +54,30 @@ const VendorDashboard = () => {
         </label>
       </div>
 
-      {/* Garden Grid */}
-      <div className="grid gap-6 w-full max-w-6xl sm:grid-cols-2 md:grid-cols-3">
-        {filteredGardens.map((garden) => (
+      {/* Garden Cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+        {filteredGardens.map(garden => (
           <div
             key={garden.id}
-            className="bg-white rounded-lg shadow p-6 hover:shadow-md transition cursor-pointer"
+            className="bg-white rounded-lg shadow-md hover:shadow-lg transition p-4 cursor-pointer"
             onClick={() => handleGardenClick(garden.id)}
           >
-            <h2 className="text-xl font-semibold text-green-700">{garden.name}</h2>
-            <p className="text-sm text-gray-600">{garden.location}</p>
-            <p className="text-sm text-gray-800 mt-2">
-              {garden.produceCount} items available
+            {/* Static Garden Image */}
+            <img
+              src="/daytime-tinted.png"
+              alt="Garden"
+              className="w-full h-40 object-cover rounded mb-4"
+            />
+
+            {/* Garden Info */}
+            <h2 className="text-2xl font-bold text-green-800 mb-1">{garden.name}</h2>
+            <p className="text-lg text-gray-700">{garden.location}</p>
+            <p className="text-md text-gray-800 mt-2">
+              Items Available: {garden.produceCount}
             </p>
-            <p className="text-xs text-gray-500">Distance: {garden.distance} km</p>
-            <button
-              className="mt-4 bg-green-700 text-white font-semibold py-2 px-4 rounded shadow hover:bg-green-800 transition-colors duration-200"
-            >
+            <p className="text-sm text-gray-500">Distance: {garden.distance} km</p>
+
+            <button className="mt-4 bg-green-600 text-white text-md px-4 py-2 rounded hover:bg-green-700 transition">
               View Garden
             </button>
           </div>
