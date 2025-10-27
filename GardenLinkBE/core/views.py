@@ -1,7 +1,9 @@
-from rest_framework import viewsets, generics
-from rest_framework.permissions import IsAuthenticated
+from rest_framework import viewsets, status
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
-from rest_framework.decorators import api_view
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
 from .models import Garden, Produce, Vendor, Order, OrderItem
 from .serializers import GardenSerializer, ProduceSerializer, VendorSerializer, OrderSerializer, OrderItemSerializer
 
@@ -17,7 +19,7 @@ class GardenViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
 
-# 🥕 Produce ViewSet (for authenticated gardener)
+# 🥕 Produce ViewSet
 class ProduceViewSet(viewsets.ModelViewSet):
     serializer_class = ProduceSerializer
     permission_classes = [IsAuthenticated]
@@ -60,3 +62,32 @@ def gardener_produce(request):
     produce = Produce.objects.filter(garden__in=gardens)
     serializer = ProduceSerializer(produce, many=True)
     return Response(serializer.data)
+
+# 🔐 Custom Login Endpoint
+@api_view(['POST'])
+@permission_classes([AllowAny])
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    username = request.data.get('username')
+    password = request.data.get('password')
+
+    print(f"🔍 Attempting login for: {username}")
+    user = authenticate(username=username, password=password)
+
+    if user is None:
+        print("❌ Authentication failed")
+        return Response({'detail': 'Invalid credentials'}, status=401)
+
+    print("✅ Authentication succeeded")
+    token, _ = Token.objects.get_or_create(user=user)
+
+    vendor_id = getattr(user.vendor, 'id', None) if hasattr(user, 'vendor') else None
+    garden = Garden.objects.filter(owner=user).first()
+    gardener_id = garden.id if garden else None
+
+    return Response({
+        'token': token.key,
+        'vendor_id': vendor_id,
+        'gardener_id': gardener_id,
+    })
