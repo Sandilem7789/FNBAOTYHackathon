@@ -3,8 +3,19 @@ import { createContext, useContext, useState } from 'react';
 const CartContext = createContext();
 
 export function CartProvider({ children }) {
+  // ✅ Restore vendorId from localStorage
+  const [vendorId, setVendorId] = useState(() => {
+    const stored = localStorage.getItem('vendorId');
+    return stored ? Number(stored) : null;
+  });
+
   const [items, setItems] = useState([]);
-  const [vendorId, setVendorId] = useState(null); // Set this when vendor logs in or selects
+
+  // ✅ Update vendorId and persist it
+  const updateVendorId = (id) => {
+    localStorage.setItem('vendorId', id);
+    setVendorId(Number(id));
+  };
 
   const addToCart = (produce, quantity = 1) => {
     setItems(prev => {
@@ -27,7 +38,16 @@ export function CartProvider({ children }) {
   const clearCart = () => setItems([]);
 
   return (
-    <CartContext.Provider value={{ items, vendorId, setVendorId, addToCart, removeFromCart, clearCart }}>
+    <CartContext.Provider
+      value={{
+        items,
+        vendorId,
+        setVendorId: updateVendorId, // ✅ Use the updater
+        addToCart,
+        removeFromCart,
+        clearCart
+      }}
+    >
       {children}
     </CartContext.Provider>
   );

@@ -1,11 +1,8 @@
-name,location,contact_person,phone_number,latitude,longitude,image,owner_id
-Esikhawini Community Garden,Esikhawini,Thuli,0821234567,-28.9,31.8,garden1.png,1
-Empangeni Growers Hub,Empangeni,Sipho,0839876543,-28.7,31.9,garden2.png,2
-Ngwelezane Green Patch,Ngwelezane,Nokuthula,0841112233,-28.8,31.7,garden3.png,3
-Richards Bay Urban Farm,Richards Bay,Thabo,0825556677,-28.6,32.0,garden4.png,4
-KwaDlangezwa Garden Co-op,KwaDlangezwa,Zanele,0834445566,-28.5,31.6,garden5.png,5
-Nseleni Gardens,Nseleni,Nomusa,0827778899,-28.4,31.5,garden6.png,6
-Mtunzini Community Farm,Mtunzini,Sizwe,0839990001,-28.3,31.4,garden7.png,7
-Darnall Green Space,Darnall,Lindiwe,0842223344,-28.2,31.3,garden8.png,8
-Felixton Veggie Patch,Felixton,Mandla,0823334455,-28.1,31.2,garden9.png,9
-Mandlanzini Garden Project,Mandlanzini,Busi,0836667788,-28.0,31.1,garden10.png,10
+name,quantity,unit,weight,price,image,garden_id
+Beetroot,10,kg,10.0,30,produce_images/Beetrot-img.png,1
+Carrots,15,kg,15.0,25,produce_images/Carrots-img.png,1
+Green Pepper,8,kg,8.0,20,produce_images/Green_Pepper.png,2
+Potatoes,20,kg,20.0,35,produce_images/Potatoes-img.png,2
+Tomatoes,12,kg,12.0,28,produce_images/Tomatoes-img.png,3
+Cabbage,18,kg,18.0,22,produce_images/Cabbage-img.png,3
+Spinach,25,kg,25.0,15,produce_images/Spinach-img.png,4

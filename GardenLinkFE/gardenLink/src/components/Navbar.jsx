@@ -1,9 +1,16 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { FaHome, FaTachometerAlt, FaShoppingCart, FaSignOutAlt } from 'react-icons/fa';
+import { useCart } from '../context/CartContext';
+
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const navigate = useNavigate();
+  const role = localStorage.getItem('role');
+
+  const { items } = useCart();
+  const cartCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -21,10 +28,30 @@ const Navbar = () => {
           </Link>
 
           {/* Desktop Links */}
-          <div className="hidden md:flex space-x-6">
-            <Link to="/" className="text-green-700 hover:text-green-900 font-medium">Home</Link>
-            <Link to="/vendor/dashboard" className="text-green-700 hover:text-green-900 font-medium">Dashboard</Link>
-            <button onClick={handleLogout} className="text-red-600 hover:text-red-800 font-medium">Logout</button>
+          <div className="hidden md:flex space-x-6 items-center">
+            <Link to="/" className="text-green-900 hover:text-green-800 font-medium flex items-center gap-2">
+              <FaHome /> Home
+            </Link>
+            <Link to={`/${role}/dashboard`} className="text-green-800 hover:text-green-900 font-medium flex items-center gap-2">
+              <FaTachometerAlt /> Dashboard
+            </Link>
+            {role === 'vendor' && (
+              <Link to="/cart" className="relative text-green-700 hover:text-green-900 font-medium flex items-center gap-2">
+                <FaShoppingCart />
+                Cart
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-2 bg-red-600 text-white text-xs rounded-full px-2 py-0.5">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+            )}
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-2 text-red-600 hover:text-red-800 font-medium"
+            >
+              <FaSignOutAlt /> Logout
+            </button>
           </div>
 
           {/* Mobile Menu Button */}
@@ -39,9 +66,20 @@ const Navbar = () => {
       {/* Mobile Menu */}
       {isOpen && (
         <div className="md:hidden px-4 pb-4 space-y-2">
-          <Link to="/" className="block text-green-700 hover:text-green-900 font-medium">Home</Link>
-          <Link to="/vendor/dashboard" className="block text-green-700 hover:text-green-900 font-medium">Dashboard</Link>
-          <button onClick={handleLogout} className="block text-red-600 hover:text-red-800 font-medium">Logout</button>
+          <Link to="/" className="block text-green-700 hover:text-green-900 font-medium flex items-center gap-2">
+            <FaHome /> Home
+          </Link>
+          <Link to={`/${role}/dashboard`} className="block text-green-700 hover:text-green-900 font-medium flex items-center gap-2">
+            <FaTachometerAlt /> Dashboard
+          </Link>
+          {role === 'vendor' && (
+            <Link to="/cart" className="block text-green-700 hover:text-green-900 font-medium flex items-center gap-2">
+              <FaShoppingCart /> Cart
+            </Link>
+          )}
+          <button onClick={handleLogout} className="block text-red-600 hover:text-red-800 font-medium">
+            Logout
+          </button>
         </div>
       )}
     </nav>

@@ -1,8 +1,6 @@
-import axios from 'axios';
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import api from '../api';
-
 
 const AuthScreen = () => {
   const [isLogin, setIsLogin] = useState(true);
@@ -20,21 +18,46 @@ const AuthScreen = () => {
         username,
         password,
       });
-      const token = response.data.token;
-      localStorage.setItem('token', token);
-      localStorage.setItem('role', role); // store role for later use
 
-      // Redirect based on role
+      const { token, vendor_id, gardener_id } = response.data;
+      console.log('Submitting login:', { username, password });
+
+      localStorage.setItem('token', token);
+      localStorage.setItem('role', role);
+
+      // ✅ Store vendorId or gardenerId based on role
+      if (role === 'vendor') {
+        if (vendor_id && Number(vendor_id) > 0) {
+          localStorage.setItem('vendorId', vendor_id);
+          console.log('Vendor ID stored:', vendor_id);
+        } else {
+          console.warn('Vendor ID missing or invalid in response:', vendor_id);
+          alert('Login succeeded but vendor ID is missing. Please contact support.');
+          return;
+        }
+      } else if (role === 'gardener') {
+        if (gardener_id && Number(gardener_id) > 0) {
+          localStorage.setItem('gardenerId', gardener_id);
+          console.log('Gardener ID stored:', gardener_id);
+        } else {
+          console.warn('Gardener ID missing or invalid in response:', gardener_id);
+          alert('Login succeeded but gardener ID is missing. Please contact support.');
+          return;
+        }
+      }
+
+      // ✅ Redirect based on role
       if (role === 'vendor') {
         navigate('/vendor/dashboard');
       } else {
         navigate('/gardener/dashboard');
       }
     } catch (error) {
-      console.error('Login failed:', error);
-      alert('Invalid credentials');
+      console.error('Login failed:', error.response?.data || error.message);
+      alert('Invalid credentials. Please try again.');
     }
   };
+
 
   return (
     <div className="flex items-center justify-center min-h-[calc(100vh-5rem)] px-4">

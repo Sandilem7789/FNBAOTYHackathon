@@ -63,17 +63,18 @@ def gardener_produce(request):
     serializer = ProduceSerializer(produce, many=True)
     return Response(serializer.data)
 
-# 🔐 Custom Login Endpoint
-@api_view(['POST'])
-@permission_classes([AllowAny])
+# 🔐 Fixed Custom Login Endpoint
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
 
+    print("✅ Custom login view hit")
     print(f"🔍 Attempting login for: {username}")
+
     user = authenticate(username=username, password=password)
+    print(f"Result of authenticate: {user}")
 
     if user is None:
         print("❌ Authentication failed")

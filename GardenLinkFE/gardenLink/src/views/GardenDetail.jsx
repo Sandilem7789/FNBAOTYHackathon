@@ -22,7 +22,7 @@ function GardenDetail() {
   }, [id]);
 
   return (
-    <div className="p-6 max-w-7xl mx-auto">
+    <div className="p-6 max-w-7xl mx-auto mt-20">
       {garden && (
         <div className="text-center mb-8">
           <h1 className="text-4xl font-extrabold text-emerald-800 mb-2">
@@ -52,7 +52,10 @@ function GardenDetail() {
               <p className="text-gray-700 font-medium">R{p.price}</p>
               <button
                 className="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded"
-                onClick={() => addToCart(p, 1)}
+                onClick={() => {
+                  addToCart(p, 1);
+                  alert(`${p.name} added to cart`);
+                }}
               >
                 Add to Order
               </button>
